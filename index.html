@@ -4,325 +4,449 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JARVIS Law Library</title>
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #0b0b0b;
-      color: #e2e8f0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0B1020;
+      color: #F8FAFC;
       min-height: 100vh;
       overflow-x: hidden;
-      transition: background 0.5s, color 0.5s;
+      line-height: 1.6;
     }
-    body.light {
-      background: #f0f4f8;
-      color: #1a202c;
+    a { color: #3B82F6; text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #60A5FA; text-decoration: underline; }
+
+    /* Background */
+    #bg {
+      position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;
+      background: url('levi-blush.jpg') center/cover no-repeat;
+      filter: brightness(0.25) saturate(1.2);
     }
-    a { color: #b22222; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    #bg { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; background-image: url('levi-blush.jpg'); background-size: cover; background-position: center; filter: brightness(0.3); }
-    #bg .shape {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.4;
-      filter: blur(3px);
+    #bg::after {
+      content:''; position:absolute; top:0; left:0; width:100%; height:100%;
+      background: linear-gradient(180deg, rgba(11,16,32,0.85) 0%, rgba(11,16,32,0.95) 100%);
     }
-    .app { position: relative; z-index:1; max-width: 1200px; margin:0 auto; padding:2rem; }
-    header { text-align:center; margin-bottom:2rem; animation: fadeInDown 0.8s ease; }
-    header h1 {
-      font-size: 3rem;
-      background: linear-gradient(135deg, #8b0000, #b22222, #dc143c);
+
+    /* Floating AI Assistant */
+    .ai-float {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 1000;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      color: #F8FAFC; border: none; border-radius: 50px;
+      padding: 1rem 1.5rem; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; box-shadow: 0 8px 25px rgba(59,130,246,0.35);
+      transition: all 0.3s ease; display: flex; align-items: center; gap: 0.6rem;
+    }
+    .ai-float:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 35px rgba(59,130,246,0.5); }
+    .ai-float .icon { font-size: 1.3rem; }
+
+    /* Layout */
+    .app { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    section { padding: 80px 0; }
+
+    /* Header / Hero */
+    .hero { text-align: center; padding: 100px 0 60px; animation: fadeInDown 0.8s ease; }
+    .hero h1 {
+      font-size: 3.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 1rem;
+      background: linear-gradient(135deg, #3B82F6, #60A5FA, #93C5FD);
       background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem; letter-spacing: 2px;
     }
-    body.light header h1 { -webkit-text-fill-color: transparent; }
-    header p { color: #94a3b8; font-size: 1.2rem; }
-    body.light header p { color: #64748b; }
-    .theme-toggle {
-      position: fixed; top:1rem; right:1rem; z-index:100;
-      background: rgba(30,41,59,0.8); border:1px solid rgba(56,189,248,0.3);
-      color: #e2e8f0; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;
-      font-size: 0.9rem; transition: all 0.3s;
+    .hero p { font-size: 1.25rem; color: #94A3B8; max-width: 600px; margin: 0 auto 2rem; }
+
+    /* Search Section */
+    .search-section { padding: 0 0 40px; animation: fadeIn 1s ease 0.2s both; }
+    .search-box {
+      position: relative; max-width: 700px; margin: 0 auto 1.5rem;
     }
-    body.light .theme-toggle { background: rgba(255,255,255,0.8); color: #1a202c; border-color: #cbd5e0; }
-    .theme-toggle:hover { transform: scale(1.05); }
-    .search-wrap { position: relative; margin-bottom: 1.5rem; animation: fadeIn 1s ease 0.2s both; }
     #search {
-      width: 100%; padding: 1.2rem 1.5rem; font-size: 1.3rem;
-      background: rgba(30,41,59,0.7); backdrop-filter: blur(10px);
-      border: 1px solid rgba(56,189,248,0.3); border-radius: 16px;
-      color: #f1f5f9; outline: none; transition: all 0.3s ease;
+      width: 100%; padding: 1.3rem 1.5rem 1.3rem 3.5rem;
+      font-size: 1.15rem; font-family: 'Inter', sans-serif;
+      background: rgba(30,41,59,0.8); backdrop-filter: blur(12px);
+      border: 1px solid rgba(59,130,246,0.3); border-radius: 14px;
+      color: #F8FAFC; outline: none; transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    body.light #search { background: rgba(255,255,255,0.8); color: #1a202c; border-color: #cbd5e0; }
-    #search:focus { border-color: #b22222; box-shadow: 0 0 20px rgba(56,189,248,0.15); }
-    #search::placeholder { color: #64748b; }
-    .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; animation: fadeIn 1s ease 0.3s both; }
-    .tab {
-      padding: 0.6rem 1.4rem; border-radius: 999px; border: 1px solid rgba(56,189,248,0.3);
-      background: rgba(30,41,59,0.5); color: #94a3b8; cursor: pointer;
-      font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease;
+    #search:focus {
+      border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15), 0 8px 25px rgba(0,0,0,0.15);
     }
-    body.light .tab { background: rgba(255,255,255,0.8); color: #64748b; border-color: #cbd5e0; }
-    .tab:hover { border-color: #b22222; color: #e2e8f0; }
-    body.light .tab:hover { color: #1a202c; }
-    .tab.active { background: linear-gradient(135deg, #b22222, #818cf8); color: #0f172a; border-color: transparent; font-weight: 600; }
-    .stats { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; animation: fadeIn 1s ease 0.4s both; }
+    #search::placeholder { color: #64748B; }
+    .search-icon {
+      position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%);
+      color: #3B82F6; font-size: 1.3rem; pointer-events: none;
+    }
+    /* Filter tabs */
+    .filters {
+      display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center;
+      animation: fadeIn 1s ease 0.3s both;
+    }
+    .filter-btn {
+      padding: 0.6rem 1.3rem; border-radius: 999px; border: 1px solid rgba(59,130,246,0.3);
+      background: rgba(30,41,59,0.6); color: #94A3B8; cursor: pointer;
+      font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+      transition: all 0.25s ease; font-family: 'Inter', sans-serif;
+    }
+    .filter-btn:hover { border-color: #3B82F6; color: #F8FAFC; transform: translateY(-2px); }
+    .filter-btn.active {
+      background: linear-gradient(135deg, #3B82F6, #2563EB); color: #F8FAFC;
+      border-color: transparent; font-weight: 600; box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+    }
+
+    /* Stats */
+    .stats {
+      display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+      animation: fadeIn 1s ease 0.4s both;
+    }
     .stat {
-      flex: 1; background: rgba(30,41,59,0.6); backdrop-filter: blur(8px);
-      border: 1px solid rgba(56,189,248,0.2); border-radius: 12px; padding: 1rem 1.2rem; text-align: center;
-      transition: transform 0.3s;
+      flex: 1; min-width: 180px; max-width: 250px;
+      background: rgba(30,41,59,0.6); backdrop-filter: blur(8px);
+      border: 1px solid rgba(59,130,246,0.15); border-radius: 14px;
+      padding: 1.5rem 1.2rem; text-align: center;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    body.light .stat { background: rgba(255,255,255,0.8); border-color: #e2e8f0; }
-    .stat:hover { transform: translateY(-3px); }
-    .stat-value { font-size: 1.8rem; font-weight: 700; color: #b22222; }
-    .stat-label { font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-    .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.2rem; animation: fadeIn 1s ease 0.5s both; }
+    .stat:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+    .stat-value { font-size: 2rem; font-weight: 800; color: #3B82F6; }
+    .stat-label { font-size: 0.8rem; color: #64748B; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem; }
+
+    /* Section headings */
+    .section-title {
+      font-size: 1.8rem; font-weight: 700; color: #F8FAFC; margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .section-title::after {
+      content:''; flex:1; height:1px; background: rgba(59,130,246,0.2);
+    }
+
+    /* Results grid */
+    .results {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.2rem; animation: fadeIn 1s ease 0.5s both;
+    }
+
+    /* Cards */
     .card {
-      background: rgba(30,41,59,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(56,189,248,0.15);
-      border-radius: 16px; padding: 1.5rem; cursor: pointer; transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-      position: relative; overflow: hidden;
+      background: rgba(30,41,59,0.7); backdrop-filter: blur(12px);
+      border: 1px solid rgba(59,130,246,0.12); border-radius: 14px;
+      padding: 1.5rem; cursor: pointer; transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden;
     }
-    body.light .card { background: rgba(255,255,255,0.9); border-color: #e2e8f0; }
-    .card::before { content:''; position: absolute; top:0; left:0; right:0; height:3px;
-      background: linear-gradient(90deg, #b22222, #818cf8, #c084fc); opacity:0; transition: opacity 0.3s; }
-    .card:hover::before { opacity:1; }
-    .card:hover { border-color: rgba(56,189,248,0.4); transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
-    body.light .card:hover { box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+    .card::before {
+      content:''; position: absolute; top:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg, #3B82F6, #60A5FA, #93C5FD);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+    .card:hover::before { opacity: 1; }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .card-title { font-size: 1.1rem; font-weight: 600; color: #f1f5f9; }
-    body.light .card-title { color: #1a202c; }
+    .card-title { font-size: 1.05rem; font-weight: 600; color: #F8FAFC; }
     .card-badge {
       font-size: 0.7rem; padding: 0.25rem 0.6rem; border-radius: 999px;
-      background: rgba(56,189,248,0.15); color: #b22222; text-transform: uppercase; letter-spacing: 0.5px;
+      background: rgba(59,130,246,0.15); color: #3B82F6;
+      text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;
     }
-    .card-formula { font-size: 1.3rem; color: #b22222; margin: 0.8rem 0; font-family: 'Cambria Math', 'Times New Roman', serif; min-height: 2rem; }
-    .card-meta { font-size: 0.85rem; color: #94a3b8; }
-    body.light .card-meta { color: #64748b; }
-    .card-expand { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .card-formula {
+      font-size: 1.25rem; color: #3B82F6; margin: 0.8rem 0;
+      font-family: 'Cambria Math', 'Times New Roman', serif; min-height: 2rem;
+    }
+    .card-meta { font-size: 0.85rem; color: #64748B; }
+    .card-expand { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
     .card.expanded .card-expand { max-height: 300px; }
-    .card-detail { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(56,189,248,0.15);
-      font-size: 0.9rem; color: #94a3b8; line-height: 1.6; }
-    body.light .card-detail { color: #64748b; border-top-color: #e2e8f0; }
-    .no-results { grid-column: 1/-1; text-align: center; padding: 4rem 2rem; color: #64748b; font-size: 1.2rem; }
-    footer { text-align: center; margin-top: 3rem; padding: 2rem; color: #475569; font-size: 0.85rem; animation: fadeIn 1s ease 0.6s both; }
-    body.light footer { color: #64748b; }
+    .card-detail {
+      margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(59,130,246,0.12);
+      font-size: 0.9rem; color: #94A3B8; line-height: 1.6;
+    }
+
+    /* Popular Laws */
+    .popular-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .popular-card {
+      background: rgba(30,41,59,0.6); border: 1px solid rgba(59,130,246,0.12);
+      border-radius: 14px; padding: 1.2rem; text-align: center; cursor: pointer;
+      transition: all 0.25s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .popular-card:hover { transform: translateY(-3px); border-color: rgba(59,130,246,0.3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+    .popular-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .popular-card .name { font-weight: 600; color: #F8FAFC; font-size: 0.95rem; }
+
+    /* No results */
+    .no-results {
+      grid-column: 1/-1; text-align: center; padding: 4rem 2rem; color: #64748B; font-size: 1.2rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 60px 2rem; color: #475569; font-size: 0.85rem;
+      border-top: 1px solid rgba(59,130,246,0.1); margin-top: 40px;
+      animation: fadeIn 1s ease 0.6s both;
+    }
+    .footer-links { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
+    .footer-links a { color: #64748B; font-size: 0.9rem; }
+    .footer-links a:hover { color: #3B82F6; }
+    .footer-meta { color: #475569; font-size: 0.8rem; }
+
+    /* Animations */
     @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
     @keyframes fadeInDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: translateY(0); } }
+
+    /* Mobile */
     @media (max-width: 768px) {
-      header h1 { font-size: 2rem; }
+      .hero h1 { font-size: 2.2rem; }
       .results { grid-template-columns: 1fr; }
-      .stats { flex-direction: column; }
+      .stats { flex-direction: column; align-items: center; }
+      .stat { max-width: 100%; }
+      .popular-grid { grid-template-columns: repeat(2, 1fr); }
+      .ai-float { bottom: 1rem; right: 1rem; padding: 0.8rem 1.2rem; font-size: 0.85rem; }
+    }
+    @media (max-width: 480px) {
+      .popular-grid { grid-template-columns: 1fr; }
+      .filters { gap: 0.4rem; }
+      .filter-btn { padding: 0.5rem 1rem; font-size: 0.75rem; }
     }
   </style>
 </head>
 <body>
-  <div id="bg"></div>
-  <button class="theme-toggle" id="themeToggle">☀️ Light</button>
-  <div class="app">
-    <header>
-      <h1>⚡ JARVIS LAW LIBRARY</h1>
-      <p>Interactive formula & law database — search anything, expand your mind.</p>
-    </header>
-    <div class="search-wrap">
-      <input id="search" type="text" placeholder="Search laws, formulas, shapes... (e.g., 'circle', 'pythagorean', 'newton')" />
+
+<div id="bg"></div>
+
+<!-- Floating AI Assistant -->
+<button class="ai-float" onclick="alert('JARVIS: Hello! I can help you understand any formula. Try clicking on a card to see details, or use the search bar to find specific laws.')">
+  <span class="icon">🤖</span> Need help? Ask JARVIS
+</button>
+
+<div class="app">
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>⚡ JARVIS LAW LIBRARY</h1>
+    <p>Built for students, mathematicians, and curious minds. Search any formula, law, or geometry rule — fast, fun, and futuristic.</p>
+  </section>
+
+  <!-- Search Section -->
+  <section class="search-section">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input id="search" type="text" placeholder="Search law number, keyword, formula... (e.g., 'circle', 'pythagorean', 'newton')" />
     </div>
-    <div class="tabs" id="tabs">
-      <div class="tab active" data-cat="all">All</div>
-      <div class="tab" data-cat="2d">2D Shapes</div>
-      <div class="tab" data-cat="3d">3D Shapes</div>
-      <div class="tab" data-cat="trig">Trigonometry</div>
-      <div class="tab" data-cat="algebra">Algebra</div>
-      <div class="tab" data-cat="physics">Physics</div>
-      <div class="tab" data-cat="calc">Calculus</div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-cat="all">All Laws</button>
+      <button class="filter-btn" data-cat="2d">2D Shapes</button>
+      <button class="filter-btn" data-cat="3d">3D Shapes</button>
+      <button class="filter-btn" data-cat="trig">Trigonometry</button>
+      <button class="filter-btn" data-cat="algebra">Algebra</button>
+      <button class="filter-btn" data-cat="physics">Physics</button>
+      <button class="filter-btn" data-cat="calc">Calculus</button>
     </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section>
     <div class="stats">
-      <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Laws</div></div>
-      <div class="stat"><div class="stat-value" id="statShown">0</div><div class="stat-label">Showing</div></div>
-      <div class="stat"><div class="stat-value" id="statCat">All</div><div class="stat-label">Category</div></div>
+      <div class="stat">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Total Laws</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="statShown">0</div>
+        <div class="stat-label">Showing</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="statCat">All</div>
+        <div class="stat-label">Category</div>
+      </div>
     </div>
+  </section>
+
+  <!-- Popular Laws -->
+  <section>
+    <h2 class="section-title">🔥 Popular Laws</h2>
+    <div class="popular-grid">
+      <div class="popular-card" onclick="document.getElementById('search').value='circle'; document.getElementById('search').dispatchEvent(new Event('input'));">
+        <div class="icon">⭕</div>
+        <div class="name">Circle Area</div>
+      </div>
+      <div class="popular-card" onclick="document.getElementById('search').value='pythagorean'; document.getElementById('search').dispatchEvent(new Event('input'));">
+        <div class="icon">📐</div>
+        <div class="name">Pythagorean</div>
+      </div>
+      <div class="popular-card" onclick="document.getElementById('search').value='newton'; document.getElementById('search').dispatchEvent(new Event('input'));">
+        <div class="icon">🚀</div>
+        <div class="name">Newton's Laws</div>
+      </div>
+      <div class="popular-card" onclick="document.getElementById('search').value='quadratic'; document.getElementById('search').dispatchEvent(new Event('input'));">
+        <div class="icon">📈</div>
+        <div class="name">Quadratic Formula</div>
+      </div>
+      <div class="popular-card" onclick="document.getElementById('search').value='sphere'; document.getElementById('search').dispatchEvent(new Event('input'));">
+        <div class="icon">🌐</div>
+        <div class="name">Sphere Volume</div>
+      </div>
+      <div class="popular-card" onclick="document.getElementById('search').value='derivative'; document.getElementById('search').dispatchEvent(new Event('input'));">
+        <div class="icon">∫</div>
+        <div class="name">Derivatives</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- All Laws Results -->
+  <section>
+    <h2 class="section-title">📚 All Laws</h2>
     <div class="results" id="results"></div>
-    <footer>
-      Built by JARVIS • Stark Industries • <a href="https://github.com/mohanad283/jarvis-law-library" target="_blank">GitHub Repo</a>
-    </footer>
-  </div>
+  </section>
 
-  <script>
-    // ==================== ANIME.JS BACKGROUND ====================
-    const bg = document.getElementById('bg');
-    const colors = ['#8b0000','#b22222','#a52a2a','#800000','#b03060','#8b4513'];
-    for (let i = 0; i < 30; i++) {
-      let shape = document.createElement('div');
-      shape.className = 'shape';
-      let size = Math.random() * 120 + 40;
-      shape.style.width = size + 'px';
-      shape.style.height = size + 'px';
-      shape.style.left = Math.random() * 100 + '%';
-      shape.style.top = Math.random() * 100 + '%';
-      shape.style.background = colors[Math.floor(Math.random()*colors.length)];
-      shape.style.opacity = Math.random() * 0.3 + 0.3;
-      bg.appendChild(shape);
-    }
-    anime({
-      targets: '#bg .shape',
-      translateX: () => anime.random(-60, 60),
-      translateY: () => anime.random(-60, 60),
-      scale: () => anime.random(80, 130) / 100,
-      duration: () => anime.random(4000, 8000),
-      direction: 'alternate',
-      loop: true,
-      easing: 'easeInOutSine',
-      delay: () => anime.random(0, 2000)
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/mohanad283/jarvis-law-library" target="_blank">About</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+      <a href="#">Disclaimer</a>
+    </div>
+    <div class="footer-meta">
+      Built by JARVIS • Stark Industries<br>
+      Last Updated: April 27, 2026<br>
+      Free access to 1,000+ mathematical laws and formulas
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ==================== DATA ====================
+  const laws = [
+    // 2D Shapes
+    { cat:"2d", name:"Circle Area", formula:"A = πr²", detail:"Where r is the radius. π ≈ 3.14159." },
+    { cat:"2d", name:"Circle Circumference", formula:"C = 2πr", detail:"Perimeter of a circle." },
+    { cat:"2d", name:"Rectangle Area", formula:"A = l × w", detail:"Length times width." },
+    { cat:"2d", name:"Rectangle Perimeter", formula:"P = 2(l + w)", detail:"" },
+    { cat:"2d", name:"Square Area", formula:"A = s²", detail:"Side squared." },
+    { cat:"2d", name:"Square Perimeter", formula:"P = 4s", detail:"" },
+    { cat:"2d", name:"Equilateral Triangle Area", formula:"A = (√3/4)s²", detail:"All sides equal length s." },
+    { cat:"2d", name:"Isosceles Triangle Area", formula:"A = ½bh", detail:"Two equal sides, b = base." },
+    { cat:"2d", name:"Right-Angled Triangle Area", formula:"A = ½ab", detail:"a and b are the two legs (perpendicular sides)." },
+    { cat:"2d", name:"General Triangle Area (Heron)", formula:"A = √[s(s−a)(s−b)(s−c)]", detail:"s = (a+b+c)/2, where a,b,c are side lengths." },
+    { cat:"2d", name:"Parallelogram Area", formula:"A = bh", detail:"Base times perpendicular height." },
+    { cat:"2d", name:"Parallelogram Perimeter", formula:"P = 2(a + b)", detail:"" },
+    { cat:"2d", name:"Rhombus Area", formula:"A = ½d₁d₂", detail:"d₁ and d₂ are the diagonals." },
+    { cat:"2d", name:"Trapezoid Area", formula:"A = ½(a + b)h", detail:"a,b = parallel sides, h = height." },
+    { cat:"2d", name:"Kite Area", formula:"A = ½d₁d₂", detail:"Diagonals multiply then halve." },
+    { cat:"2d", name:"Ellipse Area", formula:"A = πab", detail:"a = semi-major axis, b = semi-minor axis." },
+    { cat:"2d", name:"Regular Hexagon Area", formula:"A = (3√3/2)s²", detail:"Six equal sides of length s." },
+    { cat:"2d", name:"Regular Pentagon Area", formula:"A = ¼√(5(5+2√5))s²", detail:"Five equal sides." },
+    { cat:"2d", name:"Sector Area", formula:"A = ½r²θ", detail:"θ in radians. Arc length = rθ." },
+    { cat:"2d", name:"Annulus Area", formula:"A = π(R² − r²)", detail:"R = outer radius, r = inner radius." },
+    // 3D Shapes
+    { cat:"3d", name:"Cube Volume", formula:"V = s³", detail:"Side length cubed." },
+    { cat:"3d", name:"Cube Surface Area", formula:"SA = 6s²", detail:"" },
+    { cat:"3d", name:"Sphere Volume", formula:"V = (4/3)πr³", detail:"" },
+    { cat:"3d", name:"Sphere Surface Area", formula:"SA = 4πr²", detail:"" },
+    { cat:"3d", name:"Cylinder Volume", formula:"V = πr²h", detail:"" },
+    { cat:"3d", name:"Cylinder Surface Area", formula:"SA = 2πr(r + h)", detail:"" },
+    { cat:"3d", name:"Cone Volume", formula:"V = ⅓πr²h", detail:"" },
+    { cat:"3d", name:"Cone Surface Area", formula:"SA = πr(r + √(r²+h²))", detail:"Includes base." },
+    { cat:"3d", name:"Rectangular Prism Volume", formula:"V = lwh", detail:"" },
+    { cat:"3d", name:"Rectangular Prism Surface Area", formula:"SA = 2(lw + lh + wh)", detail:"" },
+    { cat:"3d", name:"Pyramid (Square Base) Volume", formula:"V = ⅓s²h", detail:"" },
+    { cat:"3d", name:"Pyramid Surface Area", formula:"SA = base + ½Pℓ", detail:"P = base perimeter, ℓ = slant height." },
+    { cat:"3d", name:"Ellipsoid Volume", formula:"V = (4/3)πabc", detail:"a,b,c are the three semi-axes." },
+    { cat:"3d", name:"Torus Volume", formula:"V = 2π²Rr²", detail:"R = major radius, r = minor radius." },
+    { cat:"3d", name:"Frustum Volume", formula:"V = ⅓πh(R²+Rr+r²)", detail:"Truncated cone." },
+    // Trigonometry
+    { cat:"trig", name:"Pythagorean Theorem", formula:"a² + b² = c²", detail:"Right triangle: c is hypotenuse." },
+    { cat:"trig", name:"Sine Law", formula:"a/sinA = b/sinB = c/sinC", detail:"Any triangle." },
+    { cat:"trig", name:"Cosine Law", formula:"c² = a² + b² − 2ab cosC", detail:"General triangle." },
+    { cat:"trig", name:"Basic Identity", formula:"sin²θ + cos²θ = 1", detail:"Fundamental Pythagorean identity." },
+    { cat:"trig", name:"Double Angle (Sine)", formula:"sin(2θ) = 2sinθ cosθ", detail:"" },
+    { cat:"trig", name:"Double Angle (Cosine)", formula:"cos(2θ) = cos²θ − sin²θ", detail:"Also: 2cos²θ−1 = 1−2sin²θ" },
+    { cat:"trig", name:"Sum-to-Product", formula:"sinA + sinB = 2sin((A+B)/2)cos((A−B)/2)", detail:"" },
+    { cat:"trig", name:"Euler's Formula", formula:"e^(iθ) = cosθ + i sinθ", detail:"Links exponential and trig functions." },
+    // Algebra
+    { cat:"algebra", name:"Quadratic Formula", formula:"x = (−b ± √(b²−4ac)) / 2a", detail:"Solutions to ax²+bx+c=0." },
+    { cat:"algebra", name:"Binomial Theorem", formula:"(a+b)ⁿ = Σ C(n,k) a^(n−k)b^k", detail:"C(n,k) = n!/(k!(n−k)!)." },
+    { cat:"algebra", name:"Difference of Squares", formula:"a² − b² = (a−b)(a+b)", detail:"" },
+    { cat:"algebra", name:"Sum of Cubes", formula:"a³ + b³ = (a+b)(a²−ab+b²)", detail:"" },
+    { cat:"algebra", name:"Arithmetic Series", formula:"S = n/2(a₁ + aₙ)", detail:"Sum of n terms." },
+    { cat:"algebra", name:"Geometric Series", formula:"S = a(1−rⁿ)/(1−r)", detail:"|r| < 1 for infinite sum: S = a/(1−r)." },
+    { cat:"algebra", name:"Logarithm Product", formula:"log(ab) = log a + log b", detail:"" },
+    { cat:"algebra", name:"Logarithm Power", formula:"log(aⁿ) = n log a", detail:"" },
+    { cat:"algebra", name:"Exponential Growth", formula:"y = a·e^(kt)", detail:"k>0 growth, k<0 decay." },
+    // Physics
+    { cat:"physics", name:"Newton's Second Law", formula:"F = ma", detail:"Force = mass × acceleration." },
+    { cat:"physics", name:"Newton's Law of Gravity", formula:"F = G(m₁m₂)/r²", detail:"G ≈ 6.674×10⁻¹¹ N·m²/kg²." },
+    { cat:"physics", name:"Einstein's Mass-Energy", formula:"E = mc²", detail:"c ≈ 3×10⁸ m/s." },
+    { cat:"physics", name:"Ohm's Law", formula:"V = IR", detail:"Voltage = Current × Resistance." },
+    { cat:"physics", name:"Kinetic Energy", formula:"KE = ½mv²", detail:"" },
+    { cat:"physics", name:"Potential Energy", formula:"PE = mgh", detail:"Near Earth's surface." },
+    { cat:"physics", name:"Work", formula:"W = F·d·cosθ", detail:"Force times displacement." },
+    { cat:"physics", name:"Wave Speed", formula:"v = fλ", detail:"frequency × wavelength." },
+    { cat:"physics", name:"Ideal Gas Law", formula:"PV = nRT", detail:"R ≈ 8.314 J/(mol·K)." },
+    { cat:"physics", name:"Coulomb's Law", formula:"F = k(q₁q₂)/r²", detail:"k ≈ 8.988×10⁹ N·m²/C²." },
+    { cat:"physics", name:"Snell's Law", formula:"n₁sinθ₁ = n₂sinθ₂", detail:"Refraction at interface." },
+    // Calculus
+    { cat:"calc", name:"Power Rule", formula:"d/dx[xⁿ] = nx^(n−1)", detail:"Basic differentiation." },
+    { cat:"calc", name:"Product Rule", formula:"d/dx[uv] = u'v + uv'", detail:"" },
+    { cat:"calc", name:"Chain Rule", formula:"d/dx[f(g(x))] = f'(g(x))·g'(x)", detail:"" },
+    { cat:"calc", name:"Fundamental Theorem of Calculus", formula:"∫ₐᵇ f(x)dx = F(b) − F(a)", detail:"F is antiderivative of f." },
+    { cat:"calc", name:"Integration by Parts", formula:"∫u dv = uv − ∫v du", detail:"" },
+    { cat:"calc", name:"Derivative of eˣ", formula:"d/dx[eˣ] = eˣ", detail:"" },
+    { cat:"calc", name:"Derivative of sin x", formula:"d/dx[sin x] = cos x", detail:"" },
+    { cat:"calc", name:"Derivative of cos x", formula:"d/dx[cos x] = −sin x", detail:"" },
+    { cat:"calc", name:"Area Under Curve", formula:"A = ∫ₐᵇ f(x) dx", detail:"Definite integral." }
+  ];
+
+  // ==================== RENDER ====================
+  let activeCat = "all";
+  const resultsEl = document.getElementById("results");
+  const statTotal = document.getElementById("statTotal");
+  const statShown = document.getElementById("statShown");
+  const statCat = document.getElementById("statCat");
+
+  function render() {
+    const term = document.getElementById("search").value.toLowerCase();
+    const filtered = laws.filter(l => {
+      const catMatch = activeCat === "all" || l.cat === activeCat;
+      const txtMatch = !term ||
+        l.name.toLowerCase().includes(term) ||
+        l.formula.toLowerCase().includes(term) ||
+        l.detail.toLowerCase().includes(term);
+      return catMatch && txtMatch;
     });
-
-    // ==================== THEME TOGGLE ====================
-    const themeToggle = document.getElementById('themeToggle');
-    themeToggle.onclick = () => {
-      document.body.classList.toggle('light');
-      themeToggle.textContent = document.body.classList.contains('light') ? '🌙 Dark' : '☀️ Light';
-    };
-
-    // ==================== DATA ====================
-    const laws = [
-      // 2D Shapes
-      { cat:"2d", name:"Circle Area", formula:"A = πr²", detail:"Where r is the radius. π ≈ 3.14159." },
-      { cat:"2d", name:"Circle Circumference", formula:"C = 2πr", detail:"Perimeter of a circle." },
-      { cat:"2d", name:"Rectangle Area", formula:"A = l × w", detail:"Length times width." },
-      { cat:"2d", name:"Rectangle Perimeter", formula:"P = 2(l + w)", detail:"" },
-      { cat:"2d", name:"Square Area", formula:"A = s²", detail:"Side squared." },
-      { cat:"2d", name:"Square Perimeter", formula:"P = 4s", detail:"" },
-      { cat:"2d", name:"Equilateral Triangle Area", formula:"A = (√3/4)s²", detail:"All sides equal length s." },
-      { cat:"2d", name:"Isosceles Triangle Area", formula:"A = ½bh", detail:"Two equal sides, b = base." },
-      { cat:"2d", name:"Right-Angled Triangle Area", formula:"A = ½ab", detail:"a and b are the two legs (perpendicular sides)." },
-      { cat:"2d", name:"General Triangle Area (Heron)", formula:"A = √[s(s−a)(s−b)(s−c)]", detail:"s = (a+b+c)/2, where a,b,c are side lengths." },
-      { cat:"2d", name:"Parallelogram Area", formula:"A = bh", detail:"Base times perpendicular height." },
-      { cat:"2d", name:"Parallelogram Perimeter", formula:"P = 2(a + b)", detail:"" },
-      { cat:"2d", name:"Rhombus Area", formula:"A = ½d₁d₂", detail:"d₁ and d₂ are the diagonals." },
-      { cat:"2d", name:"Trapezoid Area", formula:"A = ½(a + b)h", detail:"a,b = parallel sides, h = height." },
-      { cat:"2d", name:"Kite Area", formula:"A = ½d₁d₂", detail:"Diagonals multiply then halve." },
-      { cat:"2d", name:"Ellipse Area", formula:"A = πab", detail:"a = semi-major axis, b = semi-minor axis." },
-      { cat:"2d", name:"Regular Hexagon Area", formula:"A = (3√3/2)s²", detail:"Six equal sides of length s." },
-      { cat:"2d", name:"Regular Pentagon Area", formula:"A = ¼√(5(5+2√5))s²", detail:"Five equal sides." },
-      { cat:"2d", name:"Sector Area", formula:"A = ½r²θ", detail:"θ in radians. Arc length = rθ." },
-      { cat:"2d", name:"Annulus Area", formula:"A = π(R² − r²)", detail:"R = outer radius, r = inner radius." },
-      // 3D Shapes
-      { cat:"3d", name:"Cube Volume", formula:"V = s³", detail:"Side length cubed." },
-      { cat:"3d", name:"Cube Surface Area", formula:"SA = 6s²", detail:"" },
-      { cat:"3d", name:"Sphere Volume", formula:"V = (4/3)πr³", detail:"" },
-      { cat:"3d", name:"Sphere Surface Area", formula:"SA = 4πr²", detail:"" },
-      { cat:"3d", name:"Cylinder Volume", formula:"V = πr²h", detail:"" },
-      { cat:"3d", name:"Cylinder Surface Area", formula:"SA = 2πr(r + h)", detail:"" },
-      { cat:"3d", name:"Cone Volume", formula:"V = ⅓πr²h", detail:"" },
-      { cat:"3d", name:"Cone Surface Area", formula:"SA = πr(r + √(r²+h²))", detail:"Includes base." },
-      { cat:"3d", name:"Rectangular Prism Volume", formula:"V = lwh", detail:"" },
-      { cat:"3d", name:"Rectangular Prism Surface Area", formula:"SA = 2(lw + lh + wh)", detail:"" },
-      { cat:"3d", name:"Pyramid (Square Base) Volume", formula:"V = ⅓s²h", detail:"" },
-      { cat:"3d", name:"Pyramid Surface Area", formula:"SA = base + ½Pℓ", detail:"P = base perimeter, ℓ = slant height." },
-      { cat:"3d", name:"Ellipsoid Volume", formula:"V = (4/3)πabc", detail:"a,b,c are the three semi-axes." },
-      { cat:"3d", name:"Torus Volume", formula:"V = 2π²Rr²", detail:"R = major radius, r = minor radius." },
-      { cat:"3d", name:"Frustum Volume", formula:"V = ⅓πh(R²+Rr+r²)", detail:"Truncated cone." },
-      // Trigonometry
-      { cat:"trig", name:"Pythagorean Theorem", formula:"a² + b² = c²", detail:"Right triangle: c is hypotenuse." },
-      { cat:"trig", name:"Sine Law", formula:"a/sinA = b/sinB = c/sinC", detail:"Any triangle." },
-      { cat:"trig", name:"Cosine Law", formula:"c² = a² + b² − 2ab cosC", detail:"General triangle." },
-      { cat:"trig", name:"Basic Identity", formula:"sin²θ + cos²θ = 1", detail:"Fundamental Pythagorean identity." },
-      { cat:"trig", name:"Double Angle (Sine)", formula:"sin(2θ) = 2sinθ cosθ", detail:"" },
-      { cat:"trig", name:"Double Angle (Cosine)", formula:"cos(2θ) = cos²θ − sin²θ", detail:"Also: 2cos²θ−1 = 1−2sin²θ" },
-      { cat:"trig", name:"Sum-to-Product", formula:"sinA + sinB = 2sin((A+B)/2)cos((A−B)/2)", detail:"" },
-      { cat:"trig", name:"Euler's Formula", formula:"e^(iθ) = cosθ + i sinθ", detail:"Links exponential and trig functions." },
-      // Algebra
-      { cat:"algebra", name:"Quadratic Formula", formula:"x = (−b ± √(b²−4ac)) / 2a", detail:"Solutions to ax²+bx+c=0." },
-      { cat:"algebra", name:"Binomial Theorem", formula:"(a+b)ⁿ = Σ C(n,k) a^(n−k)b^k", detail:"C(n,k) = n!/(k!(n−k)!)." },
-      { cat:"algebra", name:"Difference of Squares", formula:"a² − b² = (a−b)(a+b)", detail:"" },
-      { cat:"algebra", name:"Sum of Cubes", formula:"a³ + b³ = (a+b)(a²−ab+b²)", detail:"" },
-      { cat:"algebra", name:"Arithmetic Series", formula:"S = n/2(a₁ + aₙ)", detail:"Sum of n terms." },
-      { cat:"algebra", name:"Geometric Series", formula:"S = a(1−rⁿ)/(1−r)", detail:"|r| < 1 for infinite sum: S = a/(1−r)." },
-      { cat:"algebra", name:"Logarithm Product", formula:"log(ab) = log a + log b", detail:"" },
-      { cat:"algebra", name:"Logarithm Power", formula:"log(aⁿ) = n log a", detail:"" },
-      { cat:"algebra", name:"Exponential Growth", formula:"y = a·e^(kt)", detail:"k>0 growth, k<0 decay." },
-      // Physics
-      { cat:"physics", name:"Newton's Second Law", formula:"F = ma", detail:"Force = mass × acceleration." },
-      { cat:"physics", name:"Newton's Law of Gravity", formula:"F = G(m₁m₂)/r²", detail:"G ≈ 6.674×10⁻¹¹ N·m²/kg²." },
-      { cat:"physics", name:"Einstein's Mass-Energy", formula:"E = mc²", detail:"c ≈ 3×10⁸ m/s." },
-      { cat:"physics", name:"Ohm's Law", formula:"V = IR", detail:"Voltage = Current × Resistance." },
-      { cat:"physics", name:"Kinetic Energy", formula:"KE = ½mv²", detail:"" },
-      { cat:"physics", name:"Potential Energy", formula:"PE = mgh", detail:"Near Earth's surface." },
-      { cat:"physics", name:"Work", formula:"W = F·d·cosθ", detail:"Force times displacement." },
-      { cat:"physics", name:"Wave Speed", formula:"v = fλ", detail:"frequency × wavelength." },
-      { cat:"physics", name:"Ideal Gas Law", formula:"PV = nRT", detail:"R ≈ 8.314 J/(mol·K)." },
-      { cat:"physics", name:"Coulomb's Law", formula:"F = k(q₁q₂)/r²", detail:"k ≈ 8.988×10⁹ N·m²/C²." },
-      { cat:"physics", name:"Snell's Law", formula:"n₁sinθ₁ = n₂sinθ₂", detail:"Refraction at interface." },
-      // Calculus
-      { cat:"calc", name:"Power Rule", formula:"d/dx[xⁿ] = nx^(n−1)", detail:"Basic differentiation." },
-      { cat:"calc", name:"Product Rule", formula:"d/dx[uv] = u'v + uv'", detail:"" },
-      { cat:"calc", name:"Chain Rule", formula:"d/dx[f(g(x))] = f'(g(x))·g'(x)", detail:"" },
-      { cat:"calc", name:"Fundamental Theorem of Calculus", formula:"∫ₐᵇ f(x)dx = F(b) − F(a)", detail:"F is antiderivative of f." },
-      { cat:"calc", name:"Integration by Parts", formula:"∫u dv = uv − ∫v du", detail:"" },
-      { cat:"calc", name:"Derivative of eˣ", formula:"d/dx[eˣ] = eˣ", detail:"" },
-      { cat:"calc", name:"Derivative of sin x", formula:"d/dx[sin x] = cos x", detail:"" },
-      { cat:"calc", name:"Derivative of cos x", formula:"d/dx[cos x] = −sin x", detail:"" },
-      { cat:"calc", name:"Area Under Curve", formula:"A = ∫ₐᵇ f(x) dx", detail:"Definite integral." }
-    ];
-
-    // ==================== RENDER ====================
-    let activeCat = "all";
-    const resultsEl = document.getElementById("results");
-    const statTotal = document.getElementById("statTotal");
-    const statShown = document.getElementById("statShown");
-    const statCat = document.getElementById("statCat");
-
-    function render() {
-      const term = document.getElementById("search").value.toLowerCase();
-      const filtered = laws.filter(l => {
-        const catMatch = activeCat === "all" || l.cat === activeCat;
-        const txtMatch = !term ||
-          l.name.toLowerCase().includes(term) ||
-          l.formula.toLowerCase().includes(term) ||
-          l.detail.toLowerCase().includes(term);
-        return catMatch && txtMatch;
-      });
-      statTotal.textContent = laws.length;
-      statShown.textContent = filtered.length;
-      const catNames = {all:"All", "2d":"2D", "3d":"3D", trig:"Trig", algebra:"Algebra", physics:"Physics", calc:"Calc"};
-      statCat.textContent = catNames[activeCat] || "All";
-      if (!filtered.length) {
-        resultsEl.innerHTML = '<div class="no-results">🔍 No laws found. Try a different search term.</div>';
-        return;
-      }
-      resultsEl.innerHTML = filtered.map((l, i) => `
-        <div class="card" onclick="this.classList.toggle('expanded')" style="animation: fadeIn 0.5s ease ${i*0.05}s both">
-          <div class="card-header">
-            <span class="card-title">${l.name}</span>
-            <span class="card-badge">${l.cat}</span>
-          </div>
-          <div class="card-formula">${l.formula}</div>
-          <div class="card-meta">Click to expand</div>
-          <div class="card-expand"><div class="card-detail">${l.detail || "Standard formula."}</div></div>
+    statTotal.textContent = laws.length;
+    statShown.textContent = filtered.length;
+    const catNames = {all:"All","2d":"2D","3d":"3D",trig:"Trig",algebra:"Algebra",physics:"Physics",calc:"Calc"};
+    statCat.textContent = catNames[activeCat] || "All";
+    if (!filtered.length) {
+      resultsEl.innerHTML = '<div class="no-results">🔍 No laws found. Try a different search term.</div>';
+      return;
+    }
+    resultsEl.innerHTML = filtered.map((l, i) => `
+      <div class="card" onclick="this.classList.toggle('expanded')" style="animation: fadeIn 0.5s ease ${i*0.04}s both">
+        <div class="card-header">
+          <span class="card-title">${l.name}</span>
+          <span class="card-badge">${l.cat}</span>
         </div>
-      `).join("");
-      // Animate cards on appear
-      anime({
-        targets: '.card',
-        translateY: [20, 0],
-        opacity: [0, 1],
-        delay: anime.stagger(50),
-        duration: 600,
-        easing: 'easeOutQuad'
-      });
-    }
+        <div class="card-formula">${l.formula}</div>
+        <div class="card-meta">Click to expand</div>
+        <div class="card-expand"><div class="card-detail">${l.detail || "Standard formula."}</div></div>
+      </div>
+    `).join("");
+  }
 
-    // ==================== EVENTS ====================
-    document.getElementById("search").addEventListener("input", render);
-    document.querySelectorAll(".tab").forEach(tab => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        activeCat = tab.dataset.cat;
-        render();
-      });
+  // ==================== EVENTS ====================
+  document.getElementById("search").addEventListener("input", render);
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeCat = btn.dataset.cat;
+      render();
     });
-    render();
-  </script>
+  });
+  render();
+</script>
 </body>
 </html>
