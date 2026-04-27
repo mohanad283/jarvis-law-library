@@ -66,26 +66,105 @@ function getDailyFormula() {
   return formula;
 }
 
-// Initialize daily formula display when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  const daily = getDailyFormula();
-  if (daily) {
-    const container = document.getElementById('daily-result');
-    if (container) {
-      container.innerHTML = `
-        <div class="card" onclick="this.classList.toggle('expanded')">
-          <div class="card-header">
-            <span class="card-title">${daily.name}</span>
-            <button class="fav-btn ${isFavorite(daily.name)?'active':''}" onclick="event.stopPropagation(); toggleFavorite('${daily.name.replace(/'/g,"\\'")}')">☆</button>
-            <span class="card-badge">${daily.cat}</span>
-          </div>
-          <div class="card-formula">${daily.formula}</div>
-          <div class="card-expand"><div class="card-detail">${daily.detail || "Standard formula."}</div></div>
-        </div>
-      `;
-    }
+// ==================== WHICH FORMULA? ====================
+const formulaHints = [
+  { keywords: ['speed', 'distance', 'time'], formula: 'v = d/t', explanation: 'Speed = Distance ÷ Time' },
+  { keywords: ['force', 'mass', 'acceleration'], formula: 'F = ma', explanation: "Newton's Second Law" },
+  { keywords: ['voltage', 'current', 'resistance'], formula: 'V = IR', explanation: "Ohm's Law" },
+  { keywords: ['area', 'circle'], formula: 'A = πr²', explanation: 'Circle area' },
+  { keywords: ['area', 'triangle'], formula: 'A = ½bh', explanation: 'Triangle area' },
+  { keywords: ['volume', 'sphere'], formula: 'V = (4/3)πr³', explanation: 'Sphere volume' },
+  { keywords: ['pythagorean', 'right', 'triangle'], formula: 'a² + b² = c²', explanation: 'Pythagorean Theorem' },
+  { keywords: ['quadratic', 'equation', 'roots'], formula: 'x = (−b ± √(b²−4ac)) / 2a', explanation: 'Quadratic Formula' },
+  { keywords: ['energy', 'mass'], formula: 'E = mc²', explanation: "Einstein's Mass-Energy" },
+  { keywords: ['kinetic', 'energy'], formula: 'KE = ½mv²', explanation: 'Kinetic Energy' },
+  { keywords: ['potential', 'energy', 'height'], formula: 'PE = mgh', explanation: 'Potential Energy' },
+  { keywords: ['wave', 'speed', 'frequency'], formula: 'v = fλ', explanation: 'Wave Speed' },
+  { keywords: ['ideal', 'gas'], formula: 'PV = nRT', explanation: 'Ideal Gas Law' },
+  { keywords: ['derivative', 'power'], formula: "d/dx[xⁿ] = nx^(n−1)", explanation: 'Power Rule' },
+  { keywords: ['integral', 'area', 'curve'], formula: 'A = ∫ₐᵇ f(x) dx', explanation: 'Area Under Curve' }
+];
+
+function findFormulaByHint(query) {
+  const q = query.toLowerCase();
+  const matches = formulaHints.filter(h =>
+    h.keywords.some(k => q.includes(k))
+  );
+  if (matches.length) {
+    return matches.sort((a,b) => {
+      const aMatch = a.keywords.filter(k => q.includes(k)).length;
+      const bMatch = b.keywords.filter(k => q.includes(k)).length;
+      return bMatch - aMatch;
+    })[0];
   }
-});
+  return null;
+}
+
+// ==================== FORMULA REARRANGER ====================
+function rearrangeFormula(formula, solveFor) {
+  // Simple rearrangements for common formulas
+  const rearrangements = {
+    'V = IR': { 'V': 'V = IR', 'I': 'I = V/R', 'R': 'R = V/I' },
+    'a² + b² = c²': { 'c': 'c = √(a² + b²)', 'a': 'a = √(c² - b²)', 'b': 'b = √(c² - a²)' },
+    'E = mc²': { 'E': 'E = mc²', 'm': 'm = E/c²', 'c': 'c = √(E/m)' },
+    'F = ma': { 'F': 'F = ma', 'm': 'm = F/a', 'a': 'a = F/m' },
+    'A = πr²': { 'A': 'A = πr²', 'r': 'r = √(A/π)' },
+    'V = πr²h': { 'V': 'V = πr²h', 'r': 'r = √(V/(πh))', 'h': 'h = V/(πr²)' },
+    'v = d/t': { 'v': 'v = d/t', 'd': 'd = v×t', 't': 't = d/v' },
+    'PV = nRT': { 'P': 'P = nRT/V', 'V': 'V = nRT/P', 'n': 'n = PV/(RT)', 'T': 'T = PV/(nR)' },
+    'KE = ½mv²': { 'KE': 'KE = ½mv²', 'm': 'm = 2KE/v²', 'v': 'v = √(2KE/m)' },
+    'PE = mgh': { 'PE': 'PE = mgh', 'm': 'm = PE/(gh)', 'g': 'g = PE/(mh)', 'h': 'h = PE/(mg)' }
+  };
+  const rearr = rearrangements[formula];
+  if (rearr && rearr[solveFor]) {
+    return rearr[solveFor];
+  }
+  return `Solving for ${solveFor}: Rearrange ${formula} algebraically.`;
+}
+
+// ==================== STEP-BY-STEP SOLVER ====================
+function solveStepByStep(formula, variable, values) {
+  let steps = [];
+  const f = formula.trim();
+
+  if (f === 'V = IR') {
+    if (variable === 'V') {
+      steps = [
+        `Given: I = ${values.I}, R = ${values.R}`,
+        `Formula: V = I × R`,
+        `Substitute: V = ${values.I} × ${values.R}`,
+        `Calculate: V = ${(values.I * values.R).toFixed(2)} V`
+      ];
+    } else if (variable === 'I') {
+      steps = [
+        `Given: V = ${values.V}, R = ${values.R}`,
+        `Formula: I = V / R`,
+        `Substitute: I = ${values.V} / ${values.R}`,
+        `Calculate: I = ${(values.V / values.R).toFixed(2)} A`
+      ];
+    } else if (variable === 'R') {
+      steps = [
+        `Given: V = ${values.V}, I = ${values.I}`,
+        `Formula: R = V / I`,
+        `Substitute: R = ${values.V} / ${values.I}`,
+        `Calculate: R = ${(values.V / values.I).toFixed(2)} Ω`
+      ];
+    }
+  } else if (f === 'a² + b² = c²') {
+    if (variable === 'c') {
+      steps = [
+        `Given: a = ${values.a}, b = ${values.b}`,
+        `Formula: c = √(a² + b²)`,
+        `Substitute: c = √(${values.a}² + ${values.b}²)`,
+        `Calculate: c = √(${(values.a*values.a).toFixed(2)} + ${(values.b*values.b).toFixed(2)})`,
+        `Result: c = ${Math.sqrt(values.a*values.a + values.b*values.b).toFixed(2)}`
+      ];
+    }
+  } else {
+    steps = [`Step-by-step solver for "${formula}" is coming soon.`, `Try: V=IR, a²+b²=c², E=mc², etc.`];
+  }
+  return steps;
+}
 
 // ==================== CALCULATORS ====================
 function showCalculator(type) {
@@ -106,19 +185,13 @@ function showCalculator(type) {
         const v = parseFloat(document.getElementById('ohm-v').value);
         const i = parseFloat(document.getElementById('ohm-i').value);
         const r = parseFloat(document.getElementById('ohm-r').value);
-        let result = '';
         if (!isNaN(v) && !isNaN(i) && !isNaN(r)) {
-          if (v === i * r) result = `✅ V = I × R → ${v} = ${i} × ${r}`;
-          else if (v === i * r) result = `✅ V = ${i} × ${r} = ${v}V`;
-          else result = `V = I × R → ${i} × ${r} = ${i*r}V (expected ${v}V)`;
-        } else {
-          // Solve for missing
-          if (v && i) result = `R = V / I = ${v} / ${i} = ${(v/i).toFixed(2)}Ω`;
-          else if (v && r) result = `I = V / R = ${v} / ${r} = ${(v/r).toFixed(2)}A`;
-          else if (i && r) result = `V = I × R = ${i} × ${r} = ${(i*r).toFixed(2)}V`;
-          else result = 'Enter any two values to calculate the third.';
+          if (Math.abs(v - i*r) < 0.01) return `✅ V = I × R → ${v} = ${i} × ${r}`;
         }
-        return result;
+        if (v && i) return `R = V / I = ${v} / ${i} = ${(v/i).toFixed(2)}Ω`;
+        if (v && r) return `I = V / R = ${v} / ${r} = ${(v/r).toFixed(2)}A`;
+        if (i && r) return `V = I × R = ${i} × ${r} = ${(i*r).toFixed(2)}V`;
+        return 'Enter any two values to calculate the third.';
       }
     },
     'pythagorean': {
@@ -138,7 +211,7 @@ function showCalculator(type) {
         if (a && b && c) {
           const calc = Math.sqrt(a*a + b*b);
           if (Math.abs(calc - c) < 0.01) return `✅ Right triangle: ${a}² + ${b}² = ${c}²`;
-          else return `Not a right triangle: ${a}² + ${b}² = ${(a*a+b*b).toFixed(2)}, but c² = ${c*c}`;
+          return `Not a right triangle: ${a}² + ${b}² = ${(a*a+b*b).toFixed(2)}, but c² = ${c*c}`;
         }
         return 'Enter two sides to find the third, or all three to verify.';
       }
@@ -174,6 +247,60 @@ function showCalculator(type) {
         const area = Math.PI * r * r;
         return `A = πr² = π × ${r}² = ${area.toFixed(4)}`;
       }
+    },
+    'which-formula': {
+      title: "Which Formula Do I Use? 🤖",
+      inputs: [
+        { id: 'hint-query', label: 'Describe your problem:', placeholder: 'e.g., speed distance time, force mass acceleration' }
+      ],
+      calculate: () => {
+        const query = document.getElementById('hint-query').value;
+        if (!query.trim()) return 'Please describe what you need.';
+        const result = findFormulaByHint(query);
+        if (result) {
+          return `🎯 <strong>Recommended Formula:</strong> ${result.formula}<br><br>
+                  📝 <strong>Explanation:</strong> ${result.explanation}<br><br>
+                  💡 <strong>Try searching:</strong> "${result.formula}"`;
+        }
+        return `🔍 No specific formula found. Try searching for: "pythagorean", "ohm", "quadratic", "energy", etc.`;
+      }
+    },
+    'rearrange': {
+      title: "Formula Rearranger 🔄",
+      inputs: [
+        { id: 'rearr-formula', label: 'Formula:', placeholder: 'e.g., V = IR, E = mc², a² + b² = c²' },
+        { id: 'rearr-solve', label: 'Solve for:', placeholder: 'e.g., V, m, c' }
+      ],
+      calculate: () => {
+        const formula = document.getElementById('rearr-formula').value;
+        const solveFor = document.getElementById('rearr-solve').value;
+        if (!formula || !solveFor) return 'Please enter both formula and variable to solve for.';
+        return `🔄 <strong>Rearranged:</strong> ${rearrangeFormula(formula, solveFor)}`;
+      }
+    },
+    'step-solver': {
+      title: "Step-by-Step Solver 📝",
+      inputs: [
+        { id: 'step-formula', label: 'Formula:', placeholder: 'e.g., V = IR' },
+        { id: 'step-variable', label: 'Solve for:', placeholder: 'e.g., V' },
+        { id: 'step-v1-name', label: 'Known variable 1 name:', placeholder: 'e.g., I' },
+        { id: 'step-v1-val', label: 'Known variable 1 value:', placeholder: 'e.g., 2' },
+        { id: 'step-v2-name', label: 'Known variable 2 name:', placeholder: 'e.g., R' },
+        { id: 'step-v2-val', label: 'Known variable 2 value:', placeholder: 'e.g., 6' }
+      ],
+      calculate: () => {
+        const formula = document.getElementById('step-formula').value;
+        const variable = document.getElementById('step-variable').value;
+        const values = {};
+        const v1Name = document.getElementById('step-v1-name').value;
+        const v1Val = parseFloat(document.getElementById('step-v1-val').value);
+        const v2Name = document.getElementById('step-v2-name').value;
+        const v2Val = parseFloat(document.getElementById('step-v2-val').value);
+        if (v1Name) values[v1Name] = v1Val;
+        if (v2Name) values[v2Name] = v2Val;
+        const steps = solveStepByStep(formula, variable, values);
+        return steps.map((s, i) => `${i+1}. ${s}`).join('<br>');
+      }
     }
   };
 
@@ -185,7 +312,7 @@ function showCalculator(type) {
     ${calc.inputs.map(inp => `
       <div style="margin-bottom:0.8rem;">
         <label style="display:block; color:#94A3B8; margin-bottom:0.3rem; font-size:0.9rem;">${inp.label}</label>
-        <input type="number" id="${inp.id}" placeholder="${inp.placeholder}" style="width:100%; padding:0.7rem; background:rgba(30,41,59,0.8); border:1px solid rgba(59,130,246,0.3); border-radius:8px; color:#F8FAFC; font-size:1rem;">
+        <input type="text" id="${inp.id}" placeholder="${inp.placeholder}" style="width:100%; padding:0.7rem; background:rgba(30,41,59,0.8); border:1px solid rgba(59,130,246,0.3); border-radius:8px; color:#F8FAFC; font-size:1rem;">
       </div>
     `).join('')}
     <button onclick="document.getElementById('calc-result').innerHTML = calculators['${type}'].calculate()" style="padding:0.7rem 1.5rem; background:linear-gradient(135deg,#3B82F6,#2563EB); color:#F8FAFC; border:none; border-radius:8px; cursor:pointer; font-weight:600; margin-top:0.5rem;">Calculate</button>
