@@ -53,6 +53,23 @@
       background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .hero p { font-size: 1.25rem; color: #94A3B8; max-width: 600px; margin: 0 auto 2rem; }
+    .cta-button {
+      display: inline-block;
+      margin-top: 1.5rem;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      color: #F8FAFC;
+      padding: 0.9rem 1.8rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(59,130,246,0.25);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .cta-button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(59,130,246,0.35);
+    }
 
     /* Search Section */
     .search-section { padding: 0 0 40px; animation: fadeIn 1s ease 0.2s both; }
@@ -224,10 +241,38 @@
   <section class="hero">
     <h1>⚡ JARVIS LAW LIBRARY</h1>
     <p>Built for students, mathematicians, and curious minds. Search any formula, law, or geometry rule — fast, fun, and futuristic.</p>
+    <a href="#search-section" class="cta-button">Start Searching</a>
+  </section>
+
+  <!-- Why Use Jarvis Law Library? -->
+  <section class="why-section">
+    <h2 class="section-title">Why Use JARVIS Law Library? 🚀</h2>
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="why-icon">⚡</div>
+        <h3>Fast Legal Search</h3>
+        <p>Lightning-fast search across 1,000+ formulas and laws.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-icon">📚</div>
+        <h3>Clean Organized Laws</h3>
+        <p>Every formula neatly categorized for instant access.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-icon">🤖</div>
+        <h3>AI Explanations</h3>
+        <p>JARVIS assistant helps you understand any law in plain language.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-icon">🎓</div>
+        <h3>Student Friendly</h3>
+        <p>Built by an Egyptian student to simplify law for everyone.</p>
+      </div>
+    </div>
   </section>
 
   <!-- Search Section -->
-  <section class="search-section">
+  <section class="search-section" id="search-section">
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input id="search" type="text" placeholder="Search law number, keyword, formula... (e.g., 'circle', 'pythagorean', 'newton')" />
@@ -302,11 +347,13 @@
   <footer>
     <div class="footer-links">
       <a href="https://github.com/mohanad283/jarvis-law-library" target="_blank">About</a>
-      <a href="#">Privacy</a>
+      <a href="#">Privacy Policy</a>
       <a href="#">Contact</a>
       <a href="#">Disclaimer</a>
+      <a href="#">Sources</a>
     </div>
     <div class="footer-meta">
+      Built by an Egyptian student to simplify law for everyone.<br><br>
       Built by JARVIS • Stark Industries<br>
       Last Updated: April 27, 2026<br>
       Free access to 1,000+ mathematical laws and formulas
