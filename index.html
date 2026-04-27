@@ -25,8 +25,8 @@
     #bg .shape {
       position: absolute;
       border-radius: 50%;
-      opacity: 0.15;
-      filter: blur(1px);
+      opacity: 0.4;
+      filter: blur(3px);
     }
     .app { position: relative; z-index:1; max-width: 1200px; margin:0 auto; padding:2rem; }
     header { text-align:center; margin-bottom:2rem; animation: fadeInDown 0.8s ease; }
@@ -161,7 +161,7 @@
       shape.style.left = Math.random() * 100 + '%';
       shape.style.top = Math.random() * 100 + '%';
       shape.style.background = colors[Math.floor(Math.random()*colors.length)];
-      shape.style.opacity = Math.random() * 0.12 + 0.05;
+      shape.style.opacity = Math.random() * 0.3 + 0.3;
       bg.appendChild(shape);
     }
     anime({
