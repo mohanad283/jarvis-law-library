@@ -140,6 +140,13 @@
       background: linear-gradient(135deg, #3B82F6, #2563EB); color: #F8FAFC;
       border-color: transparent; font-weight: 600; box-shadow: 0 4px 12px rgba(59,130,246,0.3);
     }
+    .fav-btn {
+      background: none; border: none; font-size: 1.2rem; cursor: pointer;
+      padding: 0.2rem; margin-left: 0.5rem; transition: transform 0.2s;
+    }
+    .fav-btn:hover { transform: scale(1.2); }
+    .fav-btn.active { color: #FBBF24; }
+    .card.favorite { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.05); }
 
     /* Stats */
     .stats {
@@ -492,26 +499,36 @@
 
   function render() {
     const term = document.getElementById("search").value.toLowerCase();
-    const filtered = laws.filter(l => {
-      const catMatch = activeCat === "all" || l.cat === activeCat;
-      const txtMatch = !term ||
+    let filtered = laws;
+    // Handle favorites filter
+    if (activeCat === "favs") {
+      const favs = getFavorites();
+      filtered = filtered.filter(l => favs.includes(l.name));
+    } else if (activeCat !== "all") {
+      filtered = filtered.filter(l => l.cat === activeCat);
+    }
+    // Apply text filter
+    if (term) {
+      filtered = filtered.filter(l =>
         l.name.toLowerCase().includes(term) ||
         l.formula.toLowerCase().includes(term) ||
-        l.detail.toLowerCase().includes(term);
-      return catMatch && txtMatch;
-    });
+        l.detail.toLowerCase().includes(term)
+      );
+    }
     statTotal.textContent = laws.length;
     statShown.textContent = filtered.length;
-    const catNames = {all:"All","2d":"2D","3d":"3D",trig:"Trig",algebra:"Algebra",physics:"Physics",calc:"Calc"};
+    const catNames = {all:"All","2d":"2D","3d":"3D",trig:"Trig",algebra:"Algebra",physics:"Physics",calc:"Calc",favs:"Favorites"};
     statCat.textContent = catNames[activeCat] || "All";
     if (!filtered.length) {
       resultsEl.innerHTML = '<div class="no-results">🔍 No laws found. Try a different search term.</div>';
       return;
     }
+    const favs = getFavorites();
     resultsEl.innerHTML = filtered.map((l, i) => `
-      <div class="card" onclick="this.classList.toggle('expanded')" style="animation: fadeIn 0.5s ease ${i*0.04}s both">
+      <div class="card ${favs.includes(l.name)?'favorite':''}" onclick="this.classList.toggle('expanded')" style="animation: fadeIn 0.5s ease ${i*0.04}s both">
         <div class="card-header">
           <span class="card-title">${l.name}</span>
+          <button class="fav-btn ${favs.includes(l.name)?'active':''}" onclick="event.stopPropagation(); toggleFavorite('${l.name.replace(/'/g,"\\'")}')">☆</button>
           <span class="card-badge">${l.cat}</span>
         </div>
         <div class="card-formula">${l.formula}</div>
